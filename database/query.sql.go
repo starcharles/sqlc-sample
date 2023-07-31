@@ -20,22 +20,27 @@ func (q *Queries) CreateEntry(ctx context.Context, content string) (sql.Result, 
 }
 
 const getEntries = `-- name: GetEntries :many
-SELECT id, content, created_at
+SELECT id, content
 FROM entries
 ORDER BY created_at DESC
 LIMIT ?
 `
 
-func (q *Queries) GetEntries(ctx context.Context, limit int32) ([]Entry, error) {
+type GetEntriesRow struct {
+	ID      int64
+	Content string
+}
+
+func (q *Queries) GetEntries(ctx context.Context, limit int32) ([]GetEntriesRow, error) {
 	rows, err := q.db.QueryContext(ctx, getEntries, limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Entry
+	var items []GetEntriesRow
 	for rows.Next() {
-		var i Entry
-		if err := rows.Scan(&i.ID, &i.Content, &i.CreatedAt); err != nil {
+		var i GetEntriesRow
+		if err := rows.Scan(&i.ID, &i.Content); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
