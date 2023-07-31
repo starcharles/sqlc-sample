@@ -5,3 +5,6 @@ migrate-up:
 
 migrate-down:
 	dbmate down
+
+sqlc-generate:
+	sqlc generate

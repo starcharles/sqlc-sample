@@ -1,0 +1,7 @@
+
+# prerequisities
+
+- dbmate
+- sqlc
+
+
