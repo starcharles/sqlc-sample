@@ -1,0 +1,16 @@
+-- migrate:up
+CREATE TABLE posts (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    title VARCHAR(255),
+    body TEXT,
+    user_id BIGINT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+
+-- migrate:down
+DROP TABLE posts;
+
