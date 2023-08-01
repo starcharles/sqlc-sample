@@ -9,6 +9,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/starcharles/sqlc-example/database"
+	"github.com/starcharles/sqlc-example/response"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -23,21 +24,34 @@ func main() {
 	client := database.New(db)
 	e := echo.New()
 
-	e.GET("/entries", func(ctx echo.Context) error {
-		entries, err := client.GetEntries(context.Background(), 10)
+	e.GET("/users", func(ctx echo.Context) error {
+		users, err := client.GetUsers(context.Background(), 10)
 		if err != nil {
 			return err
 		}
 
-		return ctx.JSON(http.StatusOK, entries)
+		var res response.GetUsersResponse
+		for _, user := range users {
+			res.Users = append(res.Users, &response.User{
+				Id:        user.ID,
+				Name:      user.Name,
+				Email:     user.Email,
+				CreatedAt: user.CreatedAt.String(),
+				UpdatedAt: user.UpdatedAt.String(),
+			})
+		}
+
+		log.Printf("%+v", res)
+
+		return ctx.JSON(http.StatusOK, res)
 	})
 
-	e.POST("/add", func(c echo.Context) error {
-		if _, err := client.CreateEntry(context.Background(), c.FormValue("content")); err != nil {
-			log.Println(err.Error())
-			return c.String(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
-		}
-		return c.Redirect(http.StatusFound, "/")
-	})
+	// e.POST("/user", func(c echo.Context) error {
+	// 	if _, err := client.CreateUser(context.Background(), c.FormValue("content")); err != nil {
+	// 		log.Println(err.Error())
+	// 		return c.String(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+	// 	}
+	// 	return c.Redirect(http.StatusFound, "/")
+	// })
 	e.Logger.Fatal(e.Start(":8989"))
 }
