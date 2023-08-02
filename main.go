@@ -31,6 +31,7 @@ func main() {
 		}
 
 		var res response.GetUsersResponse
+		res.Users = make([]*response.User, 0)
 		for _, user := range users {
 			res.Users = append(res.Users, &response.User{
 				Id:        user.ID,
@@ -40,8 +41,6 @@ func main() {
 				UpdatedAt: user.UpdatedAt.String(),
 			})
 		}
-
-		log.Printf("%+v", res)
 
 		return ctx.JSON(http.StatusOK, res)
 	})
