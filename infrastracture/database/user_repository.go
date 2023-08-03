@@ -1,42 +1,51 @@
 package database
 
 import (
-	"github.com/starcharles/sqlc-example/database"
+	"context"
+	"database/sql"
+	"fmt"
+
 	"github.com/starcharles/sqlc-example/domain/entities"
+	domain "github.com/starcharles/sqlc-example/domain/repositories"
 	"github.com/starcharles/sqlc-example/domain/value_object"
+	"github.com/starcharles/sqlc-example/sqlc"
 )
 
 type UserRepository struct {
-	client *database.Queries
+	client *sqlc.Queries
 }
 
-func (r UserRepository) FindOne(id value_object.ID) (*entities.User, error) {
-	user, err := r.client.GetUser(id.Value())
+func (r UserRepository) FindOne(ctx context.Context, id value_object.ID) (*entities.User, error) {
+	fmt.Println("aaaaaaa")
+	fmt.Println(id.Value())
+	user, err := r.client.GetUser(ctx, int64(id.Value()))
+	fmt.Print(user)
+	fmt.Print(err)
 	if err != nil {
 		return nil, err
 	}
 
-	return moduleToEntity(user)
+	return modelToEntity(&user)
 }
 
-func moduleToEntity(model *database.User) (*entities.User, error) *entities.User {
+func modelToEntity(model *sqlc.User) (*entities.User, error) {
 	id, err := value_object.NewID(int(model.ID))
 	if err != nil {
 		return nil, err
 	}
 
 	return entities.NewUser(
-		id,
+		*id,
 		model.Name,
 		model.Email,
 		model.Password,
 		model.CreatedAt,
 		model.UpdatedAt,
-	)
+	), nil
 }
 
-func NewUserRepository(db *db.sql) *UserRepository {
+func NewUserRepository(db *sql.DB) domain.IUserRepository {
 	return &UserRepository{
-		client: database.New(db),
+		client: sqlc.New(db),
 	}
 }

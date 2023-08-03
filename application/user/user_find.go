@@ -1,9 +1,12 @@
-package application
+package user_usecase
 
 import (
-	"time"
+	"context"
+	"fmt"
 
-	"github.com/starcharles/sqlc-example/domain/repositories"
+	"github.com/starcharles/sqlc-example/application"
+	"github.com/starcharles/sqlc-example/domain/entities"
+	domain "github.com/starcharles/sqlc-example/domain/repositories"
 	"github.com/starcharles/sqlc-example/domain/value_object"
 )
 
@@ -12,31 +15,30 @@ type UserFindInput struct {
 }
 
 type UserFindOutput struct {
-	ID        value_object.ID
-	Name      string
-	Email     string
-	Password  string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	User *entities.User
 }
 
-type UserFindUseCase struct {
-	userRepository repositories.IUserRepository
+type userFindUseCase struct {
+	userRepository domain.IUserRepository
+	input          UserFindInput
 }
 
-func (u *UserFindUseCase) Handle(input UserFindInput) (*UserFindOutput, error) {
-	user, err := u.userRepository.FindOne(input.ID)
+func (u *userFindUseCase) Handle(ctx context.Context) (*UserFindOutput, error) {
+	user, err := u.userRepository.FindOne(ctx, u.input.ID)
+	fmt.Println(user)
 
 	if err != nil {
 		return nil, err
 	}
 
 	return &UserFindOutput{
-		ID:        user.ID(),
-		Name:      user.Name(),
-		Email:     user.Email(),
-		Password:  user.Password(),
-		CreatedAt: user.CreatedAt(),
-		UpdatedAt: user.UpdatedAt(),
+		User: user,
 	}, nil
+}
+
+func NewUserFindUseCase(input UserFindInput, userRepository domain.IUserRepository) application.IUseCase[*UserFindOutput] {
+	return &userFindUseCase{
+		userRepository: userRepository,
+		input:          input,
+	}
 }

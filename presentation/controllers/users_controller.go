@@ -1,10 +1,12 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	application "github.com/starcharles/sqlc-example/application/user"
+	user_usecase "github.com/starcharles/sqlc-example/application/user"
+	"github.com/starcharles/sqlc-example/di"
 	"github.com/starcharles/sqlc-example/presentation/request"
 	"github.com/starcharles/sqlc-example/presentation/response"
 )
@@ -17,29 +19,29 @@ func (r UsersController) Get(ctx echo.Context) error {
 	if err := ctx.Bind(&req); err != nil {
 		return err
 	}
+	fmt.Println(req.Id)
+	fmt.Println(req.Id.Value())
 
-	application.UserFindUseCase{
-		userRepository: repositories.NewUserRepository(db),
-	}.Handle(application.UserFindInput{
-		Id: req.Id,
+	handler, err := di.UserFindUseCase(user_usecase.UserFindInput{
+		ID: req.Id,
 	})
 
 	if err != nil {
 		return err
 	}
 
-	var res response.GetUsersResponse
-	res.Users = make([]*response.User, 0)
-	for _, user := range users {
-		res.Users = append(res.Users, &response.User{
-			Id:        user.ID,
-			Name:      user.Name,
-			Email:     user.Email,
-			CreatedAt: user.CreatedAt.String(),
-			UpdatedAt: user.UpdatedAt.String(),
-		})
+	res, err := handler.Handle(ctx.Request().Context())
+	if err != nil {
+		return err
 	}
 
-	return ctx.JSON(http.StatusOK, res)
-
+	return ctx.JSON(http.StatusOK, response.GetUserResponse{
+		User: response.User{
+			Id:        int64(res.User.ID().Value()),
+			Name:      res.User.Name(),
+			Email:     res.User.Email(),
+			CreatedAt: res.User.CreatedAt(),
+			UpdatedAt: res.User.UpdatedAt(),
+		},
+	})
 }
