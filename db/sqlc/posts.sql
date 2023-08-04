@@ -10,4 +10,4 @@ ORDER BY posts.id
 LIMIT ?;
 -- name: CreatePost :execresult
 INSERT INTO posts (title, body, user_id)
-VALUES (?, ?, ?);
+VALUES (?, ?, ?) RETURNS *;
