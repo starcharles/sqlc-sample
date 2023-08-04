@@ -1,1 +1,3 @@
-database/*
+sqlc/
+tmp/
+di/wire_gen.go

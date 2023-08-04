@@ -6,8 +6,8 @@ cloud:
 project:
     id: ""
 packages:
-    - name: "database"
-      path: "database"
+    - name: "sqlc"
+      path: "sqlc"
       engine: "mysql"
       schema: "db/migrations/"
       queries: "db/sqlc/"
